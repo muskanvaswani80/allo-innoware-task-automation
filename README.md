@@ -1,110 +1,85 @@
-# Allo Innoware — AI Operations Manager Assignment Test
+# Allo Innoware — Recurring Task Tracking & Escalation Automation
 
-### Recurring Task Tracking, Pending Reports & Escalation Automation
-
----
-
-## 📌 Executive Summary
-
-This repository contains the complete, production-grade prototype built for **Allo Innoware's Operational Task Tracking & Escalation Assignment**. The system orchestrates multi-frequency recurring operational tasks (Daily, 7-Day, 15-Day, and 30-Day cadences) using **Google Sheets** as the primary operating interface, powered by **Google Apps Script** automation and deterministic state-machine governance.
-
-### Core Problems Solved
-1. **Zero Duplicate Work**: Employees operate from a single interactive portal (`01_Employee_Action_Portal`) where they can view pending tasks, enter Ticket IDs or WhatsApp completion proofs, and submit work in 1 step without updating multiple tabs.
-2. **Automated Recurrence Arithmetic**: Cycles advance automatically; next due dates are calculated dynamically respecting business days and skipping weekends. Frontline employees never calculate dates manually.
-3. **Structured Daily Task Tracking**: Eliminates ambiguity for tasks without Ticket IDs (such as WhatsApp group updates) via 1-click verification hashes, summary notes, and inbound webhooks.
-4. **Proactive Manager Governance**: Overdue tasks trigger same-day alert emails with 1-click review links and interactive acknowledgment stations on the Manager Dashboard.
-5. **Multi-Tier Leadership Escalation**: Unacknowledged alerts or unresolved grace period breaches escalate automatically to Executive Leadership.
-6. **Strict Deduplication & Noise Suppression**: State-machine locks guarantee zero duplicate task cycles, zero duplicate audit logs, and zero email spam loops.
+> A lightweight, reliable Google Sheets and Apps Script system designed to handle recurring team operations, prevent duplicate updates, alert managers on time, and escalate unresolved items to leadership.
 
 ---
 
-## 📂 Repository Deliverables Overview
+## 💡 What This System Does
 
-```
-c:\Users\muska\Downloads\ALLO INNOWARE\
-├── Allo_Innoware_Recurring_Task_System.xlsx   <-- Pre-built working prototype spreadsheet
-├── README.md                                  <-- Master project documentation (You are here)
-├── build_sheet.py                             <-- Automated Python openpyxl sheet generator
-├── google_apps_script/                        <-- Production Google Apps Script codebase
-│   ├── appsscript.json                        <-- Manifest file with scopes and timezone
-│   ├── Code.js                                <-- Core orchestrator, custom menu, doGet/doPost webhooks
-│   ├── RecurringCycles.js                     <-- Recurrence arithmetic, calendar logic, cycle rollover
-│   ├── SinglePointAction.js                   <-- Single-point employee portal handler
-│   ├── DailyTaskHandler.js                    <-- WhatsApp daily task verification & hash engine
-│   ├── ManagerAlerts.js                       <-- Same-day 17:15 overdue alert scanner
-│   ├── ManagerAcknowledgement.js              <-- In-sheet & 1-click email acknowledgment handler
-│   ├── LeadershipEscalation.js                <-- SLA breach leadership escalation engine
-│   ├── Triggers.js                            <-- Background hourly and daily cut-off triggers
-│   └── TestRunner.js                          <-- In-sheet automated test runner for Tests 1-8
-├── tests/
-│   ├── simulate_tests.py                      <-- Standalone local simulation suite (Tests 1-8)
-│   └── test_results.json                      <-- Output audit ledger & assertion verifications
-└── docs/
-    ├── 01_EXECUTIVE_SUMMARY_AND_ARCHITECTURE.md
-    ├── 02_DAILY_TASK_COMPLETION_STRATEGY.md
-    ├── 03_MANAGER_ALERTS_AND_LEADERSHIP_ESCALATION_SLA.md
-    ├── 04_TEST_CASES_AND_DEMONSTRATION_REPORT.md
-    └── 05_GOOGLE_SHEETS_SETUP_AND_DEPLOYMENT_GUIDE.md
-```
+Operational teams often struggle with recurring work: dates drift, updates happen across multiple disjointed sheets, and managers only notice overdue tasks when something breaks.
+
+This solution turns Google Sheets into a simple, automated operating console:
+* **Single-Point Employee Portal**: Team members see only what's pending for them, enter completion proofs (Ticket IDs or WhatsApp confirmations), and submit in one click.
+* **Automatic Cycle Tracking**: The system calculates the next due date based on cadence (Daily, 7-day, 15-day, 30-day) and skips weekends automatically.
+* **Daily Task Verification**: Solves the problem of daily non-ticket work (like WhatsApp updates) using 1-click verification tokens and automated webhooks.
+* **Manager Alerts**: If a task is overdue at the 17:15 cut-off, the manager gets a same-day email with a 1-click acknowledgment link.
+* **Leadership Escalation**: If an alert remains unacknowledged or unresolved past the SLA window, it automatically escalates to leadership.
+* **Zero Spam / Zero Duplicate Work**: Strict state locks guarantee that scheduled background triggers never spam inboxes or create duplicate task rows.
 
 ---
 
-## ⚡ Quick Start: Running & Verifying the System
+## 📊 Google Sheets Architecture (6 Core Tabs)
 
-### Option A: Run Local Python Verification (Tests 1 - 8)
-You can instantly execute the entire business logic simulation and verify all 8 test assertions on your local machine:
-```bash
-python tests/simulate_tests.py
-```
-*Output: All 8 tests pass with detailed output logs and outputs saved to `tests/test_results.json`.*
-
-### Option B: Deploy to Google Sheets
-1. Open [Google Drive](https://drive.google.com) and upload `Allo_Innoware_Recurring_Task_System.xlsx`.
-2. Right-click and choose **Open with > Google Sheets**, then **File > Save as Google Sheets**.
-3. Open **Extensions > Apps Script** and copy the `.js` files from `google_apps_script/`.
-4. Refresh your sheet to access the custom menu **`🚀 Allo Innoware Ops`**.
-5. Click **`🚀 Allo Innoware Ops > 🧪 Run All 8 Automated Test Cases`** to run live tests directly inside Google Sheets!
-
----
-
-## 📊 Google Sheet Prototype Architecture
-
-The spreadsheet prototype contains 6 purpose-built tabs designed for simplicity and clarity:
-
-| Tab Name | Target Audience | Primary Functionality |
+| Tab | Audience | Purpose |
 |---|---|---|
-| **`01_Employee_Action_Portal`** | Frontline Team (Emp A, B, C, D) | **Single-Point Operating Console**. Employee selects their name from dropdown; views pending/overdue tasks; types Ticket ID or WhatsApp proof in Column I; checks Column K to mark completed. |
-| **`02_Task_Master`** | System & Operations Lead | **Central State Machine & Task Registry**. Holds task IDs, assigned employees, cadences, current cycle numbers, dynamic status formulas, alert levels (0-3), and escalation timestamps. |
-| **`03_Manager_Dashboard`** | Operations Manager | **Executive Visibility & Review Station**. Live KPI cards (Active, Due Today, Overdue, Escalated); Team Recurrence Grid; and Manager Review Station to acknowledge overdue tasks. |
-| **`04_Completion_Log`** | Compliance & Auditing | **Immutable Historical Ledger**. Permanent record of every completed cycle, stamping exact completion timestamp, turnaround SLA (ON-TIME vs LATE), user identity, and proof ID. |
-| **`05_Escalations_Log`** | Management & HR | **Alert Audit Trail**. Permanent log of every alert email sent to Managers and escalations sent to Leadership, tracking acknowledgment status and resolution. |
-| **`06_System_Settings_SLA`** | Operations Administrator | **Governance Rules & Settings**. Configurable SLA thresholds, cut-off hours, manager/leadership emails, WhatsApp integration webhook URLs, and working day logic. |
+| **`01_Employee_Action_Portal`** | Team Members | Select your name from dropdown; see pending work; enter Ticket ID or WhatsApp proof; check submit. |
+| **`02_Task_Master`** | System & Lead | Central state machine tracking cadences, active cycles, due dates, and alert levels (0–3). |
+| **`03_Manager_Dashboard`** | Manager | Real-time KPI summary cards, team recurrence grid, and interactive review/acknowledgment console. |
+| **`04_Completion_Log`** | Audit & History | Immutable historical ledger recording user, timestamp, turnaround SLA (On-Time/Late), and proof. |
+| **`05_Escalations_Log`** | Management | Complete audit trail of sent manager alerts and leadership escalations. |
+| **`06_System_Settings_SLA`** | Admin | Configurable SLA cut-offs, grace periods, and recipient emails. |
 
 ---
 
-## 🎯 Verification of All 8 Assignment Tests
+## ⏱️ Proposed SLA & Escalation Matrix
 
-| Test # | Assignment Requirement | System Implementation & Verification | Result |
-|:---:|---|---|:---:|
-| **Test 1** | **Recurring cycle** | When a 7-day, 15-day, or 30-day task is completed, current cycle closes, cycle counter increments, and next due date auto-calculates without manual calculation. | **PASSED ✅** |
-| **Test 2** | **Single-point completion** | Employee operates 100% from `01_Employee_Action_Portal`. Entering Ticket ID and submitting automatically updates Master, History, and Dashboard in 1 step. | **PASSED ✅** |
-| **Test 3** | **Daily task tracking** | Proposed 3-tier solution (WhatsApp Webhook / 1-Click Verification Token `WA-CONF-...` / Mobile Form). Captures updates without Ticket IDs and rolls to next business day. | **PASSED ✅** |
-| **Test 4** | **Same-day manager alert** | Tasks uncompleted past daily 17:00 cut-off or overdue date trigger an automated Stage 1 Alert Email to the manager on the same day. | **PASSED ✅** |
-| **Test 5** | **Manager acknowledgement** | Manager reviews via 1-Click email link or Dashboard Station. System stamps `Manager_Ack = TRUE`, records notes, and extends SLA grace period, pausing escalation. | **PASSED ✅** |
-| **Test 6** | **Leadership escalation** | Tasks unreviewed within SLA window or unresolved past grace period automatically trigger an Urgent Stage 2 Escalation Email to Leadership. | **PASSED ✅** |
-| **Test 7** | **Escalation timing logic** | Proposed complete mathematical SLA matrix: Daily (17:15 alert, 1h manager window, 1.5h leadership escalation); Multi-day (18:30 alert, 12h manager window, 24h escalation). | **PASSED ✅** |
-| **Test 8** | **No duplicate alerts/work** | Running automated scanners multiple times consecutively yields **0 duplicate cycles, 0 duplicate logs, and 0 duplicate emails** via state-level locks. | **PASSED ✅** |
+| Cadence | Due Cut-off | Manager Alert Trigger | Manager Review Window | Leadership Escalation |
+|---|---|---|---|---|
+| **Daily Tasks** | 17:00 IST | **17:15 IST** (15m grace) | **1.0 Hour** (Until 18:15 IST) | **18:30 IST** (Same evening) |
+| **Every 7 Days** | 18:00 IST | **18:30 IST** on Due Date | **12 Hours** (Next day 09:00 IST) | **+24 Hours** (Next day 12:00 IST) |
+| **Every 15 Days** | 18:00 IST | **18:30 IST** on Due Date | **24 Hours** (Next day 18:30 IST) | **+48 Hours** past Due Date |
+| **Every 30 Days** | 18:00 IST | **18:30 IST** on Due Date | **24 Hours** (Next day 18:30 IST) | **+48 Hours** past Due Date |
 
 ---
 
-## 📄 Key Documentation Links
+## 🧪 Verified Test Cases (8 / 8 Passed)
 
-For comprehensive breakdowns, refer to the documentation files in the `docs/` folder:
-1. [Executive Summary & System Architecture](file:///c:/Users/muska/Downloads/ALLO%20INNOWARE/docs/01_EXECUTIVE_SUMMARY_AND_ARCHITECTURE.md)
-2. [Daily Task Completion Strategy & WhatsApp Proposal](file:///c:/Users/muska/Downloads/ALLO%20INNOWARE/docs/02_DAILY_TASK_COMPLETION_STRATEGY.md)
-3. [Manager Alerts & Leadership Escalation SLA Framework](file:///c:/Users/muska/Downloads/ALLO%20INNOWARE/docs/03_MANAGER_ALERTS_AND_LEADERSHIP_ESCALATION_SLA.md)
-4. [Demonstration & Test Execution Report (Tests 1 - 8)](file:///c:/Users/muska/Downloads/ALLO%20INNOWARE/docs/04_TEST_CASES_AND_DEMONSTRATION_REPORT.md)
-5. [Google Sheets Setup & Deployment Guide](file:///c:/Users/muska/Downloads/ALLO%20INNOWARE/docs/05_GOOGLE_SHEETS_SETUP_AND_DEPLOYMENT_GUIDE.md)
+All 8 scenarios from the assignment were verified both in Google Apps Script and through a standalone test simulation:
+
+1. **Test 1 — Recurring Cycle**: Closed 7-day task; cycle incremented from 1 to 2; next due date auto-advanced +7 days. **[PASSED ✅]**
+2. **Test 2 — Single-Point Completion**: Completed 30-day task with Ticket ID directly from Employee Portal without touching Master. **[PASSED ✅]**
+3. **Test 3 — Daily Task Method**: Captured WhatsApp operational update without a ticket ID; logged token `WA-CONF-...` and rolled to next business day. **[PASSED ✅]**
+4. **Test 4 — Same-Day Manager Alert**: Overdue task at 17:15 cut-off triggered immediate email to Manager with 1-click ack URL. **[PASSED ✅]**
+5. **Test 5 — Manager Action / Ack**: Manager review recorded with notes; status set to Acknowledged; grace period extended. **[PASSED ✅]**
+6. **Test 6 — Leadership Escalation**: Task exceeding manager response SLA escalated to Executive Leadership. **[PASSED ✅]**
+7. **Test 7 — SLA Timing Logic**: Mathematical SLA schedule validated across all frequencies. **[PASSED ✅]**
+8. **Test 8 — No Duplicate Alerts/Work**: Automated scanners ran 3x consecutively with 0 duplicate cycles, 0 duplicate logs, and 0 duplicate emails. **[PASSED ✅]**
 
 ---
-*Built for Allo Innoware Operations Leadership • October 2026*
+
+## 🚀 Quick Setup & Usage
+
+### 1. View or Run Locally
+```bash
+# Run the live test suite in terminal:
+python run_live_demo.py
+```
+
+### 2. Deploy to Google Sheets
+1. Upload `Allo_Innoware_Recurring_Task_System.xlsx` to Google Drive and open with Google Sheets.
+2. In Google Sheets, click **Extensions > Apps Script** and copy the `.js` files from the `google_apps_script/` folder.
+3. Refresh the sheet to see the custom menu: **`🚀 Allo Innoware Ops`**.
+4. Click **`🚀 Allo Innoware Ops > 🧪 Run All 8 Automated Test Cases`** to run tests live in Google Sheets.
+
+---
+
+## 📚 Detailed Documentation
+
+* 📖 [Executive Architecture & Flowchart](docs/01_EXECUTIVE_SUMMARY_AND_ARCHITECTURE.md)
+* 💬 [Daily Task Completion Strategy (WhatsApp Method)](docs/02_DAILY_TASK_COMPLETION_STRATEGY.md)
+* ⏳ [Manager Alerts & Leadership Escalation SLA](docs/03_MANAGER_ALERTS_AND_LEADERSHIP_ESCALATION_SLA.md)
+* 📋 [Full Demonstration & Test Results Report](docs/04_TEST_CASES_AND_DEMONSTRATION_REPORT.md)
+* 🛠️ [Google Sheets Setup & Deployment Guide](docs/05_GOOGLE_SHEETS_SETUP_AND_DEPLOYMENT_GUIDE.md)
+
+---
+*Created for Allo Innoware Operations Leadership Assignment*
